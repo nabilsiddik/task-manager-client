@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
+import Task from "./Components/Task";
 
 function App() {
 
@@ -17,9 +18,6 @@ function App() {
       return data;
     }
   })
-
-  console.log(allTasks)
-
 
   const handleAddTask = async (e) => {
     e.preventDefault();
@@ -55,7 +53,7 @@ function App() {
     <div className="container">
       <h1 className="text-center text-4xl font-bold">Task Manager</h1>
 
-      <form onSubmit={handleAddTask} className="">
+      <form onSubmit={handleAddTask} className="mb-10">
         <input
           type="text"
           className="input input-bordered border w-11/12 md:w-10/12 lg:w-6/12 my-5"
@@ -71,7 +69,9 @@ function App() {
 
       <div className="display-tasks">
         <div>
-          {}
+          {allTasks.map((task) => {
+            return <Task task={task}/>
+          })}
         </div>
       </div>
     </div>
