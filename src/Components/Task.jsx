@@ -4,10 +4,11 @@ import { FaEdit } from "react-icons/fa";
 import axios from "axios";
 import Swal from "sweetalert2";
 
-const Task = ({ task }) => {
+const Task = ({ task, refetch}) => {
   const [editable, setEditable] = useState(false);
   const [taskTitle, setTaskTitle] = useState(task.taskTitle);
 
+  // Update task
   const handleUpdateTask = async(taskId, e) => {
     e.preventDefault()
     
@@ -29,6 +30,27 @@ const Task = ({ task }) => {
         console.log("Error while updating task data", error)
     }
   };
+
+
+  // Delete a task
+  const handleDeleteTask = async(taskId) => {
+    try{
+        const res = await axios.delete(`${import.meta.env.VITE_MAIN_URL}/delete-task/${taskId}`)
+
+        if(res.data.deletedCount > 0){
+            Swal.fire({
+                    position: "center",
+                    icon: "error",
+                    title: "Task Deleted",
+                    showConfirmButton: false,
+                    timer: 1500,
+            });
+            refetch()
+        }
+    }catch(error){
+        console.log("Error while deleting task data", error)
+    }
+  }
 
   return (
     <form className="bg-yellow-400 py-4 px-5 mb-3 rounded-lg flex items-center justify-between">
@@ -54,7 +76,7 @@ const Task = ({ task }) => {
             Update
           </button>
         )}
-        <MdDelete className="cursor-pointer" />
+        <MdDelete onClick={() => handleDeleteTask(task._id)} className="cursor-pointer" />
       </div>
     </form>
   );

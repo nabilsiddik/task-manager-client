@@ -70,7 +70,7 @@ function App() {
       <div className="display-tasks">
         <div>
           {allTasks.map((task) => {
-            return <Task key={task._id} task={task}/>
+            return <Task key={task._id} task={task} refetch = {refetch}/>
           })}
         </div>
       </div>
