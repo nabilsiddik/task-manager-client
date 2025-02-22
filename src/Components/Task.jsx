@@ -58,16 +58,22 @@ const Task = ({ task, refetch }) => {
 
   return (
     <div className="bg-yellow-400 py-4 px-5 mb-3 rounded-lg ">
-      <form className="flex items-center justify-between">
+      <form className="flex flex-row items-center justify-between">
         <div className="w-9/12">
-          <input
-            name="taskTitleValue"
-            onChange={(e) => setTaskTitle(e.target.value)}
-            className={`text-3xl font-bold ${editable && "border px-3 py-2"}`}
-            type="text"
-            value={taskTitle}
-            disabled={!editable}
-          />
+          {editable ? (
+            <input
+              name="taskTitleValue"
+              onChange={(e) => setTaskTitle(e.target.value)}
+              className={`text-2xl font-bold w-full ${
+                editable && "border px-3 py-2"
+              }`}
+              type="text"
+              value={taskTitle}
+              disabled={!editable}
+            />
+          ) : (
+            <h3 className="text-2xl font-bold">{taskTitle}</h3>
+          )}
         </div>
 
         <div className="w-3/12 flex justify-end">
