@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import { auth } from "../../Firebase/firebase.init";
 import { GoogleAuthProvider } from "firebase/auth";
 import { onAuthStateChanged, signInWithPopup, signOut, updateProfile } from "firebase/auth";
+import axios from "axios";
 
 export const authContext = createContext(null);
 
@@ -19,6 +20,7 @@ const AuthContextProvider = ({ children }) => {
     return signInWithPopup(auth, provider)
       .then(async(result) => {
         setUser(result.user);
+        setLoading(false)
         // send user infor to database
         Swal.fire({
           position: "center center",
@@ -93,12 +95,12 @@ const AuthContextProvider = ({ children }) => {
 
         console.log(currentUser)
         
-        // // Send new user data database
-        // const {data} = await axios.post(`${import.meta.env.VITE_MAIN_URL}/users/${currentUser?.email}`, {
-        //   name: currentUser?.displayName,
-        //   email: currentUser?.email,
-        //   image: currentUser?.photoURL
-        // })
+        // Send new user data database
+        const {data} = await axios.post(`${import.meta.env.VITE_MAIN_URL}/users/${currentUser?.email}`, {
+          name: currentUser?.displayName,
+          email: currentUser?.email,
+          image: currentUser?.photoURL
+        })
       }
 
       setLoading(false)

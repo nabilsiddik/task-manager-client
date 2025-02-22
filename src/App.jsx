@@ -1,12 +1,30 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import Task from "./Components/Task";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Link } from "react-router-dom";
+import { authContext } from "./Contexts/AuthContext";
 
 function App() {
+
+  const {userSignOut} = useContext(authContext)
+
+  const handleLogout = () => {
+    userSignOut()
+    .then(res => {
+      Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "Signout successfull",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    })
+  }
+  
+
   const { data: allTasks = [], refetch } = useQuery({
     queryKey: ["allTasks"],
     queryFn: async () => {
@@ -112,6 +130,7 @@ function App() {
   return (
     <div className="container py-10">
       <h1 className="text-center text-4xl font-bold">Task Manager</h1>
+      <p onClick={handleLogout} className="font-bold text-center text-2xl py-4 cursor-pointer">Logout</p>
       <form onSubmit={handleAddTask} className="mb-10">
         <div className="flex justify-center items-center flex-col">
           <input
