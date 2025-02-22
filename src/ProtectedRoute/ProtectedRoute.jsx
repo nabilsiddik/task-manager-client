@@ -4,7 +4,6 @@ import { Navigate } from "react-router-dom";
 
 const ProtectedRoute = ({ children }) => {
   const { loading, user } = useContext(authContext);
-  console.log("my yser", user);
 
   if (loading) {
     return <h1 className="font-bold text-2xl text-center mt-20">Loading...</h1>
