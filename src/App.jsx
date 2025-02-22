@@ -3,21 +3,18 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import Task from "./Components/Task";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 function App() {
-
-  const {
-    data: allTasks = [],
-    refetch,
-  } = useQuery({
+  const { data: allTasks = [], refetch } = useQuery({
     queryKey: ["allTasks"],
     queryFn: async () => {
       const { data } = await axios.get(`
         ${import.meta.env.VITE_MAIN_URL}/tasks
       `);
       return data;
-    }
-  })
+    },
+  });
 
   const handleAddTask = async (e) => {
     e.preventDefault();
@@ -42,17 +39,56 @@ function App() {
           timer: 1500,
         });
 
-        refetch()
+        refetch();
       }
     } catch (error) {
       console.log("Error white posing task", error);
     }
   };
 
+
+    const groupedTasks = {
+      "to-do": allTasks.filter(task => task.category === "to-do"),
+      "in-progress": allTasks.filter(task => task.category === "in-progress"),
+      "done": allTasks.filter(task => task.category === "done"),
+    };
+  
+
+    const handleDragEnd = async (result) => {
+      if (!result.destination) return
+    
+      const { source, destination, draggableId } = result;
+    
+      if (source.droppableId === destination.droppableId && source.index === destination.index) {
+        return
+      }
+    
+      const taskIndex = groupedTasks[source.droppableId].findIndex(task => task._id === draggableId);
+      if (taskIndex === -1) return
+    
+      const task = groupedTasks[source.droppableId][taskIndex];
+    
+
+      groupedTasks[source.droppableId].splice(taskIndex, 1);
+    
+
+      groupedTasks[destination.droppableId].splice(destination.index, 0, { ...task, category: destination.droppableId });
+    
+      try {
+        await axios.put(`${import.meta.env.VITE_MAIN_URL}/update-dnd-task/${draggableId}`, {
+          category: destination.droppableId
+        });
+    
+ 
+        refetch();
+      } catch (error) {
+        console.error("Error updating task category:", error);
+      }
+    };
+
   return (
     <div className="container">
       <h1 className="text-center text-4xl font-bold">Task Manager</h1>
-
       <form onSubmit={handleAddTask} className="mb-10">
         <input
           type="text"
@@ -67,13 +103,39 @@ function App() {
         />
       </form>
 
-      <div className="display-tasks">
-        <div>
-          {allTasks.map((task) => {
-            return <Task key={task._id} task={task} refetch = {refetch}/>
-          })}
+      <DragDropContext onDragEnd={handleDragEnd}>
+      <div className="display-tasks grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {["to-do", "in-progress", "done"].map((category) => (
+            <Droppable key={category} droppableId={category}>
+              {(provided) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className="bg-gray-100 p-4 rounded-md"
+                >
+                  <h2 className="font-bold text-4xl text-center mb-4 capitalize">
+                    {category.replace("-", " ")}
+                  </h2>
+                  {groupedTasks[category].map((task, index) => (
+                    <Draggable key={task._id} draggableId={task._id} index={index}>
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                        >
+                          <Task task={task} refetch={refetch} />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          ))}
         </div>
-      </div>
+      </DragDropContext>
     </div>
   );
 }
